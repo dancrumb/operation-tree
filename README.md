@@ -1,6 +1,7 @@
 # Operation Tree
 [![npm package](https://nodei.co/npm/operation-tree.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/operation-tree/)
-
+[![license](https://img.shields.io/npm/l/operation-tree.svg)](http://opensource.org/licenses/MIT)
+[![github-issues](https://img.shields.io/github/issues/dancrumb/operation-tree.svg)](https://github.com/dancrumb/operation-tree/issues)
 [![Build Status](https://travis-ci.org/dancrumb/operation-tree.svg?branch=master)](https://travis-ci.org/dancrumb/operation-tree)
 [![Code Climate](https://codeclimate.com/repos/56d3cc59404c1a005f00e867/badges/3d219a32c90b3723e25d/gpa.svg)](https://codeclimate.com/repos/56d3cc59404c1a005f00e867/feed)
 [![Test Coverage](https://codeclimate.com/repos/56d3cc59404c1a005f00e867/badges/3d219a32c90b3723e25d/coverage.svg)](https://codeclimate.com/repos/56d3cc59404c1a005f00e867/coverage)
