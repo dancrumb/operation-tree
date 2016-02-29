@@ -29,3 +29,27 @@ From this graphical representation, we can make an array representation:
 This module provides a method `resolve`, which takes a tree array and resolves
 it to a final value.
 
+# Usage
+To keep things simple, operators and operand values are kept out of the tree.
+As such, you need to pass in a map of operator and operand values. Thus
+for the tree above, you might use:
+
+```
+var tree = [ 'or', ['A', 'B', 'and', ['C', 'D']]];
+var operators = {
+    'and': function (a, b) {
+        return a && b;
+    },
+    'or': function (a, b) {
+        return a || b;
+    }
+};
+var vals = {
+    'A': true,
+    'B': false,
+    'C': false,
+    'D': true
+};
+
+operationTree(tree, operators, values) === false;
+```
