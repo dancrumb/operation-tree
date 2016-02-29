@@ -1,58 +1,65 @@
 'use strict';
 var _ = require('lodash');
 
-var _decode;
-
-var processUnaryOperator = function (op, rands, is, convert) {
+var processUnaryOperator = function (unaryOperator, operands, is, convert) {
     var decodeTree = _.partial(_decode, is, convert);
-    var unaryRand = _.first(rands);
+    var unaryRand;
 
-    if (is.operator(unaryRand)) {
-        unaryRand = decodeTree([_.first(rands), _.last(rands)]);
+    if (is.operator(_.first(operands))) {
+        unaryRand = decodeTree([_.first(operands), _.last(operands)]);
     } else {
-        if(!_.isEmpty(_.tail(rands))) {
+        if(!_.isEmpty(_.tail(operands))) {
             throw 'Too many operands passed to a unary operator!';
         }
-        unaryRand = decodeTree([_.first(rands)]);
+        unaryRand = decodeTree([_.first(operands)]);
     }
-    return [op(unaryRand[0])];
+    return [unaryOperator(unaryRand[0])];
 };
 
-var processBinaryOperator = function (op, rands, is, convert) {
+var reduceBinaryOperands = function (binaryOperator, result, is, decodeTree) {
+    while (result.length > 1 && !is.operator(_.last(result))) {
+        var possibleOp = result[0];
+        var possibleoperands = result[1];
+        if (is.operator(possibleOp)) {
+            result = decodeTree([possibleOp, possibleoperands]).concat(result.slice(2));
+        } else {
+            result = [binaryOperator(decodeTree([possibleOp])[0], decodeTree([possibleoperands])[0])];
+        }
+    }
+    return result;
+};
+
+var gatherOperands = function (result, is, decodeTree, operand) {
+    if (result.length === 2 && is.operator(_.last(result))) {
+        result = [_.first(result), decodeTree([_.last(result), operand])];
+    } else {
+        if (_.isArray(operand)) {
+            result = result.concat([operand]);
+        } else {
+            result = result.concat(operand);
+        }
+
+    }
+    return result;
+};
+
+var processBinaryOperator = function (binaryOperator, operandList, is, convert) {
     var decodeTree = _.partial(_decode, is, convert);
 
-    return _.reduce(rands, function (result, rand) {
-        if(result.length === 2  && is.operator(_.last(result))) {
-            result = [_.first(result), decodeTree([_.last(result), rand])];
-        } else {
-            if(_.isArray(rand)) {
-                result = result.concat([rand]);
-            } else {
-                result = result.concat(rand);
-            }
-
-        }
-
-        while (result.length > 1 && !is.operator(_.last(result))) {
-            var possibleOp = result[0];
-            var possibleRands = result[1];
-            if(is.operator(possibleOp)) {
-                result = decodeTree([possibleOp, possibleRands]).concat(result.slice(2));
-            } else {
-                result = [op(decodeTree([possibleOp])[0], decodeTree([possibleRands])[0])];
-            }
-        }
-
-        return result;
-
+    return _.reduce(operandList, function (accumulator, operand) {
+        var operands = gatherOperands(accumulator, is, decodeTree, operand);
+        return reduceBinaryOperands(binaryOperator, operands, is, decodeTree);
     }, []);
 };
 
 var handleOperator = function (tree, convert, is) {
     var op = convert(tree[0]);
-    var rands = tree[1];
+    var operands = tree[1];
     var handler;
 
+    if(operands.length === 0) {
+        throw 'Invalid tree structure';
+    }
     if (op.length === 1) {
         handler = processUnaryOperator;
     } else if (op.length === 2) {
@@ -61,27 +68,27 @@ var handleOperator = function (tree, convert, is) {
         throw 'Only unary and binary operators are supported - ' + op;
     }
 
-    return handler(op, rands, is, convert);
+    return handler(op, operands, is, convert);
 };
 
 
-_decode = function (is, convert, tree) {
-    if (tree.length === 1) {
+var _decode = function (is, convert, tree) {
+    if (tree.length === 1 && !is.operator(tree[0])) {
         return [convert(tree[0])];
     } else if (tree.length === 2 && is.operator(tree[0])) {
         return handleOperator(tree, convert, is);
     } else {
-        throw 'Inconsistent tree structure: ' + tree;
+        throw 'Invalid tree structure: ' + tree;
     }
 };
 
 var _reduceTree = function (tree, operations, values) {
     var is = {
         operator: function (opName) {
-            return _.has(operations || {}, opName);
+            return _.has(operations, opName);
         },
         value: function (valName) {
-            return _.has(values || {}, valName);
+            return _.has(values, valName);
         }
     };
 

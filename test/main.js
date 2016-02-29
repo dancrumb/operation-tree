@@ -115,11 +115,19 @@ describe('There are some limits to what this supports', function() {
     it('only supports logical tree structures', function() {
         expect(function () {
             logicTree.resolve(['A', 'B'], ops, vals);
-        }).to.throw(/Inconsistent tree structure/);
+        }).to.throw(/Invalid tree structure/);
     });
     it('will reject multiple operands passed to a unary operator', function() {
         expect(function () {
             logicTree.resolve(['!', ['A', 'B']], ops, vals);
         }).to.throw(/Too many operands/);
+    });
+    it('will reject trees that are just an operator', function() {
+        expect(function () {
+            logicTree.resolve(['!'], ops, vals);
+        }).to.throw(/Invalid tree structure/);
+        expect(function () {
+            logicTree.resolve(['!',[]], ops, vals);
+        }).to.throw(/Invalid tree structure/);
     });
 });
