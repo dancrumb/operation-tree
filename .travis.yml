@@ -1,13 +1,14 @@
 language: node_js
 node_js:
-- '0.12'
+ - "4.1"
+ - '0.12'
 before_script:
-- npm install -g mocha codeclimate-test-reporter istanbul
-- git config --global push.default matching
-- git config --global user.email "dancrumb@gmail.com"
-- git config --global user.name "Travis-CI"
+ - npm install -g mocha codeclimate-test-reporter istanbul
+ - git config --global push.default matching
+ - git config --global user.email "dancrumb@gmail.com"
+ - git config --global user.name "Travis-CI"
 after_success:
-- codeclimate-test-reporter < coverage/lcov.info
+ - codeclimate-test-reporter < coverage/lcov.info
 addons:
   code_climate:
     repo_token: 05a55726d63eb4eec33d902ae30d365ddd6ca092a36daadf91648429604749d4
