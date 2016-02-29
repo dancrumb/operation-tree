@@ -1,7 +1,8 @@
 language: node_js
 node_js:
- - "4.1"
+ - '4.1'
  - '0.12'
+ - 'iojs'
 before_script:
  - npm install -g mocha codeclimate-test-reporter istanbul
  - git config --global push.default matching
