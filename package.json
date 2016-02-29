@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": "git@github.com:dancrumb/operation-tree.git",
   "scripts": {
-    "test": "mocha test"
+    "test": "istanbul cover _mocha test"
   },
   "author": "Dan Rumney <dancrumb@gmail.com>",
   "license": "MIT",
