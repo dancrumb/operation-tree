@@ -98,7 +98,7 @@ var testCases = [
     }
 ];
 
-describe('Converts nested array depictions of trees to RPN', function() {
+describe('Resolves operations trees into the final value', function() {
     _.each(testCases, function (testCase) {
         it('correctly decodes ' + JSON.stringify(testCase.actual), function() {
             expect(logicTree.resolve(testCase.actual, ops, vals)).to.equal(testCase.expected);
@@ -110,11 +110,16 @@ describe('There are some limits to what this supports', function() {
     it('does not support ternary operations', function() {
         expect(function() {
             logicTree.resolve(['bad', ['A', 'B', 'C']], ops, vals);
-        }).to.throw(/Only unary/);
+        }).to.throw(/Only unary and binary operators are supported/);
     });
     it('only supports logical tree structures', function() {
         expect(function () {
             logicTree.resolve(['A', 'B'], ops, vals);
         }).to.throw(/Inconsistent tree structure/);
-    })
+    });
+    it('will reject multiple operands passed to a unary operator', function() {
+        expect(function () {
+            logicTree.resolve(['!', ['A', 'B']], ops, vals);
+        }).to.throw(/Too many operands/);
+    });
 });

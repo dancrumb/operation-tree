@@ -5,10 +5,14 @@ var _decode;
 
 var processUnaryOperator = function (op, rands, is, convert) {
     var decodeTree = _.partial(_decode, is, convert);
-    var unaryRand = rands[0];
+    var unaryRand = _.first(rands);
+
     if (is.operator(unaryRand)) {
         unaryRand = decodeTree([rands[0], rands[1]]);
     } else {
+        if(!_.isEmpty(_.tail(rands))) {
+            throw 'Too many operands passed to a unary operator!';
+        }
         unaryRand = [convert(rands[0])];
     }
     return [op(unaryRand[0])];
@@ -19,7 +23,7 @@ var processBinaryOperator = function (op, rands, is, convert) {
 
     return _.reduce(rands, function (result, rand) {
         if(result.length === 2  && is.operator(_.last(result))) {
-            result = [result[0], decodeTree([result[1], rand])];
+            result = [_.first(result), decodeTree([_.last(result), rand])];
         } else {
             if(_.isArray(rand)) {
                 result = result.concat([rand]);
