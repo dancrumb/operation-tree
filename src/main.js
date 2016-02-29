@@ -8,12 +8,12 @@ var processUnaryOperator = function (op, rands, is, convert) {
     var unaryRand = _.first(rands);
 
     if (is.operator(unaryRand)) {
-        unaryRand = decodeTree([rands[0], rands[1]]);
+        unaryRand = decodeTree([_.first(rands), _.last(rands)]);
     } else {
         if(!_.isEmpty(_.tail(rands))) {
             throw 'Too many operands passed to a unary operator!';
         }
-        unaryRand = [convert(rands[0])];
+        unaryRand = decodeTree([_.first(rands)]);
     }
     return [op(unaryRand[0])];
 };

@@ -36,7 +36,13 @@ From this graphical representation, we can make an array representation:
 This module provides a method `resolve`, which takes a tree array and resolves
 it to a final value.
 
-# Usage
+## Install
+
+```sh
+npm install operation-tree
+```
+
+## Usage
 To keep things simple, operators are kept out of the tree. Values can also be kept
 out of the tree, if desired.
 As such, you need to pass in a map of operator and operand values. Any values
@@ -63,6 +69,18 @@ var vals = {
 operationTree.resolve(tree, operators, values) === false;
 ```
 
-# Caveats
+## Caveats
 Operator functions must explicitly declare their parameters, since that's the only
 way for this module to determine if they are binary or unary operators.
+
+## Author
+
+Dan Rumney <dancrumb@gmail.com> https://github.com/dancrumb
+
+## License
+
+- **MIT** : http://opensource.org/licenses/MIT
+
+## Contributing
+
+Contributions are highly welcome!
