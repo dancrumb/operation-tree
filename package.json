@@ -1,6 +1,6 @@
 {
   "name": "operation-tree",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Takes a tree of operators and operands and calculates its value",
   "main": "index.js",
   "repository": "git@github.com:dancrumb/operation-tree.git",
