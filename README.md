@@ -1,4 +1,9 @@
 # Operation Tree
+[![npm package](https://nodei.co/npm/operation-tree.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/operation-tree/)
+
+[![Build Status](https://travis-ci.org/dancrumb/operation-tree.svg?branch=master)](https://travis-ci.org/dancrumb/operation-tree)
+[![Code Climate](https://codeclimate.com/github/dancrumb/operation-tree/badges/gpa.svg)](https://codeclimate.com/github/dancrumb/operation-tree)
+[![Test Coverage](https://codeclimate.com/github/dancrumb/operation-tree/badges/coverage.svg)](https://codeclimate.com/github/dancrumb/operation-tree/coverage)
 
 So, sometimes, when you're working on a design, you end up with
 a tree representation of a series of operations.
@@ -51,5 +56,9 @@ var vals = {
     'D': true
 };
 
-operationTree(tree, operators, values) === false;
+operationTree.resolve(tree, operators, values) === false;
 ```
+
+# Caveats
+Operator functions must explicitly declare their parameters, since that's the only
+way for this module to determine if they are binary or unary operators.
