@@ -25,27 +25,6 @@ var vals = {
     'E': 'E'
 };
 
-/*
- var ops = {
- '+': function (a, b) {
- return a || b;
- },
- '.': function (a, b) {
- return a && b;
- },
- '!': function (a) {
- return !a;
- }
- };
- var vals = {
- 'A': true,
- 'B': false,
- 'C': true,
- 'D': false,
- 'E': true
- };
- */
-
 var testCases = [
     {
         actual: ['+',['A','B']],
