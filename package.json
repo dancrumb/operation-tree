@@ -1,0 +1,19 @@
+{
+  "name": "operation-tree",
+  "version": "1.0.0",
+  "description": "Takes a tree of operators and operands and calculates its value",
+  "main": "index.js",
+  "repository": "git@github.com:dancrumb/operation-tree.git",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "author": "Dan Rumney <dancrumb@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.5.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  }
+}
