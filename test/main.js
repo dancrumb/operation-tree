@@ -12,6 +12,9 @@ var ops = {
     },
     '!': function (a) {
         return '!' + a;
+    },
+    'bad': function (a, b, c) {
+        return a+b+c;
     }
 };
 var vals = {
@@ -101,4 +104,17 @@ describe('Converts nested array depictions of trees to RPN', function() {
             expect(logicTree.resolve(testCase.actual, ops, vals)).to.equal(testCase.expected);
         });
     });
+});
+
+describe('There are some limits to what this supports', function() {
+    it('does not support ternary operations', function() {
+        expect(function() {
+            logicTree.resolve(['bad', ['A', 'B', 'C']], ops, vals);
+        }).to.throw(/Only unary/);
+    });
+    it('only supports logical tree structures', function() {
+        expect(function () {
+            logicTree.resolve(['A', 'B'], ops, vals);
+        }).to.throw(/Inconsistent tree structure/);
+    })
 });
