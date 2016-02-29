@@ -35,9 +35,11 @@ This module provides a method `resolve`, which takes a tree array and resolves
 it to a final value.
 
 # Usage
-To keep things simple, operators and operand values are kept out of the tree.
-As such, you need to pass in a map of operator and operand values. Thus
-for the tree above, you might use:
+To keep things simple, operators are kept out of the tree. Values can also be kept
+out of the tree, if desired.
+As such, you need to pass in a map of operator and operand values. Any values
+ that are not in the map can be placed in the tree explicitly.
+For the tree above, you might use:
 
 ```
 var tree = [ 'or', ['A', 'B', 'and', ['C', 'D']]];
