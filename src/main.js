@@ -1,119 +1,126 @@
 'use strict';
 var _ = require('lodash');
 
-var processUnaryOperator = function (unaryOperator, operands, is, convert) {
-    var decodeTree = _.partial(_decode, is, convert);
-    var unaryRand;
+var isOperator;
 
-    if (is.operator(_.first(operands))) {
-        unaryRand = decodeTree([_.first(operands), _.last(operands)]);
+var processUnaryOperator = function (unaryOperator, operands, decode) {
+    var unaryOperand;
+
+    if (isOperator(_.first(operands))) {
+        unaryOperand = decode([_.first(operands), _.last(operands)]);
     } else {
         if(!_.isEmpty(_.tail(operands))) {
             throw 'Too many operands passed to a unary operator!';
         }
-        unaryRand = decodeTree([_.first(operands)]);
+        unaryOperand = decode([_.first(operands)]);
     }
-    return [unaryOperator(unaryRand[0])];
+    return unaryOperator(unaryOperand);
 };
 
-var reduceBinaryOperands = function (binaryOperator, result, is, decodeTree) {
-    while (result.length > 1 && !is.operator(_.last(result))) {
-        var possibleOp = result[0];
-        var possibleoperands = result[1];
-        if (is.operator(possibleOp)) {
-            result = decodeTree([possibleOp, possibleoperands]).concat(result.slice(2));
+var canBeReduced = function (operands) {
+    return _.isArray(operands) && operands.length > 1 && !isOperator(_.last(operands));
+};
+
+/*
+ * Take a list of operands and apply the binary operator to it as many times as we can to reduce
+ * that list as much as possible
+ */
+var reduceBinaryOperands = function (binaryOperator, operands, decode) {
+    while (canBeReduced(operands)) {
+        var possibleoperands = operands[1];
+        if (isOperator(_.first(operands))) {
+            operands = [decode([_.first(operands), possibleoperands])].concat(operands.slice(2));
         } else {
-            result = [binaryOperator(decodeTree([possibleOp])[0], decodeTree([possibleoperands])[0])];
+            if(operands.length > 2) {
+                throw 'Invalid tree structure: ' + operands;
+            }
+            operands = binaryOperator(decode(_.first(operands)), decode(possibleoperands));
         }
     }
-    return result;
+    return operands;
 };
 
-var gatherOperands = function (result, is, decodeTree, operand) {
-    if (result.length === 2 && is.operator(_.last(result))) {
-        result = [_.first(result), decodeTree([_.last(result), operand])];
+
+
+var gatherOperands = function (inOperands, operand, decode) {
+    var outOperands;
+    if(!_.isArray(inOperands)) {
+        outOperands = [inOperands, operand];
+    } else if (inOperands.length === 2 && isOperator(_.last(inOperands))) {
+        outOperands = [_.first(inOperands), decode([_.last(inOperands), operand])];
     } else {
         if (_.isArray(operand)) {
-            result = result.concat([operand]);
+            outOperands = inOperands.concat([operand]);
         } else {
-            result = result.concat(operand);
+            outOperands = inOperands.concat(operand);
         }
-
     }
-    return result;
+    return outOperands;
 };
 
-var processBinaryOperator = function (binaryOperator, operandList, is, convert) {
-    var decodeTree = _.partial(_decode, is, convert);
-
+var processBinaryOperator = function (binaryOperator, operandList, decode) {
     return _.reduce(operandList, function (accumulator, operand) {
-        var operands = gatherOperands(accumulator, is, decodeTree, operand);
-        return reduceBinaryOperands(binaryOperator, operands, is, decodeTree);
+        var operands = gatherOperands(accumulator, operand, decode);
+        return reduceBinaryOperands(binaryOperator, operands, decode);
     }, []);
 };
 
-var handleOperator = function (tree, convert, is) {
-    var op = convert(tree[0]);
-    var operands = tree[1];
-    var handler;
+var getOperatorProcessor = function (opFunction) {
+    var arity = opFunction.length;
 
-    if(operands.length === 0) {
-        throw 'Invalid tree structure';
-    }
-    if (op.length === 1) {
-        handler = processUnaryOperator;
-    } else if (op.length === 2) {
-        handler = processBinaryOperator;
-    } else {
-        throw 'Only unary and binary operators are supported - ' + op;
+    if (arity === 1) {
+        return processUnaryOperator;
+    } else if (arity === 2) {
+        return processBinaryOperator;
     }
 
-    return handler(op, operands, is, convert);
+    throw 'Only unary and binary operators are supported - ' + opFunction;
+};
+
+var handleOperator = function (opName, operands, decode) {
+    var opFunction = decode(opName);
+    var processor = getOperatorProcessor(opFunction);
+    return processor(opFunction, operands, decode);
 };
 
 
-var _decode = function (is, convert, tree) {
-    if (tree.length === 1 && !is.operator(tree[0])) {
-        return [convert(tree[0])];
-    } else if (tree.length === 2 && is.operator(tree[0])) {
-        return handleOperator(tree, convert, is);
-    } else {
-        throw 'Invalid tree structure: ' + tree;
-    }
-};
+var decodeTreeBranch = function (convert, opTreeBranch) {
+    var head = _.first(opTreeBranch);
+    var last = _.last(opTreeBranch);
 
-var _reduceTree = function (tree, operations, values) {
-    var is = {
-        operator: function (opName) {
-            return _.has(operations, opName);
-        },
-        value: function (valName) {
-            return _.has(values, valName);
+    if(_.isString(opTreeBranch)) {
+        return convert(opTreeBranch);
+    } else if (opTreeBranch.length === 1 && !isOperator(head)) {
+        return convert(head);
+    } else if (opTreeBranch.length === 2 && isOperator(head)) {
+        if(last.length === 0) {
+            throw 'Invalid tree structure';
         }
-    };
+        return handleOperator(head, last, _.partial(decodeTreeBranch, convert));
+    } else {
+        throw 'Invalid tree structure: ' + opTreeBranch;
+    }
+};
 
-    var convert = function (value) {
-        if(_.isString(value)) {
-            if (is.operator(value)) {
-                return operations[value];
-            } else if (is.value(value)) {
-                return values[value];
+module.exports = {
+    resolve: function (tree, operations, values) {
+
+        isOperator = _.partial(_.has, operations);
+
+        var convert = function (value) {
+            if(_.isString(value)) {
+                if (isOperator(value)) {
+                    return operations[value];
+                } else if (_.has(values, value)) {
+                    return values[value];
+                } else {
+                    return value;
+                }
             } else {
                 return value;
             }
-        } else {
-            return value;
-        }
-    };
+        };
 
-    return _decode(is, convert, tree);
-
-};
-
-var _module = {
-    resolve: function (tree, operations, values) {
-        return _reduceTree(tree, operations, values)[0];
+        return decodeTreeBranch(convert, tree);
     }
 };
-
-module.exports = _module;
